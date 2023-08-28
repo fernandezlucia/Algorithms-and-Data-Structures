@@ -1,0 +1,57 @@
+1 poda: casillero #
+2 poda: casiillero +
+3 poda: sucesores(a,k) = rotacionesCoherentes
+
+
+                | esValido(T)      i = n Y j = m
+                |
+hay(T, i j) =   |
+                |   
+                |   V   hay(T + (i,j) -> (t,k), sig(i,j))
+                    (t,k) in Memo[i, j]
+
+LI
+#IL
++L+
+
+    0   1   2   3   4   5   6   7
+    
+0   0   1   1   0
+1       0
+2
+3
+4
+5
+6
+7
+
+hay()
+
+
+            0   1   2   3   4   5   6   7
+arriba 0 ()
+abajo 1
+derecha 2
+izquierda3
+
+
+1 idea:
+
+Precomputo:
+    - Recorremos matriz e intercambiamos los caracteres por índices asociados.
+    - Precomputamos rotaciones posibles para cada indice:
+        - cada fila i de la matriz, tendrá 1 en las posiciones de las rotaciones compatibles cuando i está en el "medio"
+        - cada fila i de la matriz se corresponde con una posible dirección, cada columna es el indice del bloque y la posición i,j contiene todas las compatbiles para j según i (arriba,a bajo, etc).
+
+    
+    Empezar en i=0, j=0, avanzar casillero a casillero rotando según sucesores posibles.
+    en i = n, j = n chequear validez de camino + calcular longitud.
+
+    Si es true, agrego a vector de longitudes
+
+
+    devuelvo max y min de longitudes
+
+
+
+    
