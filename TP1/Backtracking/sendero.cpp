@@ -7,10 +7,16 @@ using namespace std;
 typedef vector<vector<int>> Tablero;
 
 vector<int> longitudes;
-
+int cantPiezas = 7;
 enum Formas {UpRight, UpLeft, DownLeft, DownRight, Vertical, Horizontal, Cross, Empty};
 
-
+int rotar(int pieza){
+    //es una L o una L rotada
+    if(pieza % cantPiezas < 4)
+        return (pieza + 1) % 4;
+    else 
+        return (++pieza % 2) + 4; // es una i o una i rotada
+}
 
 bool esSenderoValido(Tablero& tablero, int& longitud){
     int camino = 0;
@@ -19,24 +25,43 @@ bool esSenderoValido(Tablero& tablero, int& longitud){
 }
 
 void printT(Tablero& tablero){
+    cout << "---------------" << endl;
     for(int i = 0; i < tablero.size(); i ++){
         for(int j = 0; j < tablero[i].size(); j++){
             cout << tablero[i][j] << " ";
         }
         cout << "\n";
     }
+            cout << "---------------" << endl;
 }
+int cant = 0;
 
 bool haySendero(Tablero& tablero, int i, int j){
-
-    int n = tablero.size(), m = tablero[0].size();
-    //estoy en el ultimo casillero (caso base)
-    if(i == n-1 && j == m-1){
-        printT(tablero);
-        return true;
-    }
-    
+    int n = tablero.size();
+    int m = tablero[0].size();
+    int pieza = tablero[i][j];
+    int aux = tablero[i][j];
+    bool hay = false;
     int rotaciones = 0;
+    int sig_i;
+    int sig_j;
+
+    if(j == m-1){
+        sig_i = (i+1)%n;
+        sig_j = 0;
+    }else{
+        sig_i = i;
+        sig_j = (j+1)%m;
+    }
+
+    // caso base
+    if(i == n-1 && j == m-1){
+        printT(tablero); 
+          cant++;
+          cout << cant << endl;
+        return hay;
+    }
+
     switch(tablero[i][j]){
         case UpRight:
             rotaciones = 3;
@@ -49,18 +74,18 @@ bool haySendero(Tablero& tablero, int i, int j){
             break;
     }
 
-    int sig_i = j < m ? i : i+1;
-    int sig_j = j < m ? j + 1 : 0;
-    int aux = tablero[i][j];
     bool acum = true;
     for(int k = 0; k <= rotaciones; k++){
-        cout << "recursivo i j k val rotaciones " << i << " " << j << " " << k << " " << tablero[i][j] << " " << rotaciones << endl;
+        //tablero[i][j] = rotar(pieza); 
         tablero[i][j] += 1;
         acum =+ haySendero(tablero, sig_i, sig_j);
     }
     tablero[i][j] = aux;
     return acum;
-}
+
+    return hay;
+ }
+
 
 /*
     Indexar recibe un char y lo traduce al número correspondiente.
