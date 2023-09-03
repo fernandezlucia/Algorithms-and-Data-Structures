@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-
+#include <limits.h>
 using namespace std;
 
 typedef vector<vector<int>> Tablero;
@@ -9,81 +9,53 @@ typedef vector<vector<int>> Tablero;
 vector<int> longitudes;
 int cantPiezas = 7;
 enum Formas {UpRight, UpLeft, DownLeft, DownRight, Vertical, Horizontal, Cross, Empty};
+vector<int> direccionesX = {-1, 1, 0, 0};
+vector<int> direccionesY = {0, 0, -1, 1};
 
-int rotar(int pieza){
-    //es una L o una L rotada
-    if(pieza % cantPiezas < 4)
-        return (pieza + 1) % 4;
-    else 
-        return (++pieza % 2) + 4; // es una i o una i rotada
-}
+int minLen;
+int maxLen;
+int n,m;
 
-bool esSenderoValido(Tablero& tablero, int& longitud){
-    int camino = 0;
-    longitud = camino;
-    return true;
-}
-
-void printT(Tablero& tablero){
-    cout << "---------------" << endl;
-    for(int i = 0; i < tablero.size(); i ++){
-        for(int j = 0; j < tablero[i].size(); j++){
-            cout << tablero[i][j] << " ";
-        }
-        cout << "\n";
-    }
-            cout << "---------------" << endl;
-}
-int cant = 0;
-
-bool haySendero(Tablero& tablero, int i, int j){
-    int n = tablero.size();
-    int m = tablero[0].size();
-    int pieza = tablero[i][j];
+bool haySendero(Tablero& tablero, int i, int j, int longitud, Tablero visitados){
     int aux = tablero[i][j];
-    bool hay = false;
     int rotaciones = 0;
-    int sig_i;
-    int sig_j;
-
-    if(j == m-1){
-        sig_i = (i+1)%n;
-        sig_j = 0;
-    }else{
-        sig_i = i;
-        sig_j = (j+1)%m;
-    }
 
     // caso base
     if(i == n-1 && j == m-1){
-        printT(tablero); 
-          cant++;
-          cout << cant << endl;
-        return hay;
+        minLen = min(longitud, minLen);
+        maxLen = max(longitud, maxLen);
+        return true;
     }
 
-    switch(tablero[i][j]){
-        case UpRight:
-            rotaciones = 3;
-            break;
-        case Vertical:
-            rotaciones = 1;
-            break;
-        default:
-            rotaciones = 0;
-            break;
+    visitados[i][j] = true;
+    int piezaOriginal = tablero[i][j];
+
+    for(int k = 0; k < 4; k++){
+
+        int sig_i = i + direccionesX[k];
+        int sig_j = j + direccionesY[k];
+
+        bool direccionValida = sig_i < n && sig_j < m && !visitados[sig_i][sig_j];
+
+        if(direccionValida){
+            int piezaActual = tablero[sig_i][sig_j];
+            if(piezaActual == Empty)
+                return false;
+
+            if(piezaActual == Cross)
+                return haySendero(tablero, sig_i, sig_j, longitud+1, visitados);
+            else if(piezaActual == Vertical){
+                //chequeo compatibilidad entre piezas
+                
+            }
+            else if()
+
+        }
+
     }
 
-    bool acum = true;
-    for(int k = 0; k <= rotaciones; k++){
-        //tablero[i][j] = rotar(pieza); 
-        tablero[i][j] += 1;
-        acum =+ haySendero(tablero, sig_i, sig_j);
-    }
-    tablero[i][j] = aux;
-    return acum;
 
-    return hay;
+    
  }
 
 
@@ -164,7 +136,7 @@ bool getInputManual(vector<Tablero> &tableros) {
 int main(int argc, char **argv) {
     vector<Tablero> tableros;
     bool failed_table_read;
-
+    longitudes = vector<int>();
     
     if(argc > 1)
         failed_table_read = getInputFromFile(argv[1], tableros);
@@ -176,9 +148,20 @@ int main(int argc, char **argv) {
 
     //por cada test llenamos las estructuras
 
+
     for(int i = 0; i < tableros.size(); ++i){
         //backtracking
-        haySendero(tableros[i], 0, 0);
+
+        minLen = INT_MAX;
+        maxLen = -INT_MAX;
+
+        n = tableros[i].size();
+        m = tableros[i][0].size();
+
+        Tablero visitados = vector<vector<int>>(n, vector<int>(m, 0));
+        if(haySendero(tableros[i], 0, 0, 0, visitados))
+            printf("POSIBLE {%d} {%d}", minLen, maxLen);
+        
     }
 
     return EXIT_SUCCESS;
