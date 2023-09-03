@@ -22,14 +22,20 @@ bool comparar(const Par& a, const Par& b){
 
 
 long greedy(vector<long long> M, vector<long long> C, int n){
+    //Estrategia greedy: ordenar los parciales según la razón Ci / Mi (descontento generado por minuto) de mayor a menor entrega solución óptima
+    //pues minimiza la suma acumulada de tiempo esperado para el alumno de mayor descontento por minuto de los que aún no corrigó.
+
+    //Inicializamos vector de pares Ci, Mi sobre el que vamos a ordenar según el coeficiente.
     vector<Par> pares = vector<Par>(n);
     for(int i = 0; i < n; i++){
         pares[i].Mi = M[i];
         pares[i].Ci = C[i];
     }
 
+    //Utilizamos stable sort para asegurar complejidad a lo sumo n*log^2(n) -sort no garantiza complejidad de peor caso, solo de caso promedio-
     stable_sort(pares.begin(), pares.end(), comparar);
     
+    //Una vez ordenado, basta con acumular la suma de tiempo esperado multiplicado al descontento para cada alumno en el orden que tocó.
     long long minutos = 0;
     long long acum = 0;
     for(int i = 0; i < n; i++){
