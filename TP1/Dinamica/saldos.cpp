@@ -4,7 +4,7 @@
 
 using namespace std;
 #define INDEFINIDO -1
-int offset = 100000;
+int offset = 10 * 10 * 10 * 10 * 10 * 10;
 //i recorre el vector de xi
 //saldoAcumulado la suma acumulada hasta el paso i
 
@@ -23,7 +23,6 @@ bool saldos(int i, int acumulado, int w, vector<int>& v, vector<vector<bool>>& m
         
         memo[i][acumulado+offset] = sumar | restar;
     }
-    cout << "asd" << endl;
     return memo[i][acumulado+offset];
 }
 
@@ -48,19 +47,21 @@ int main() {
             cin >> val;
             valores.push_back(val);
         }
-        vector<vector<bool>> memo = vector<vector<bool>>(n, vector<bool>(2*offset*n, NULL));
+
+        vector<vector<bool>> memo = vector<vector<bool>>(n+1, vector<bool>(2*offset*n, NULL));
         vector<pair<bool, bool>> signos = vector<pair<bool, bool>>(n, make_pair(false, false));
 
-        printf("%d", saldos(n, 0, w, valores, memo, signos));
+        saldos(n, 0, w, valores, memo, signos);
 
-        /*for(int i = 0; i < signos.size(); i++){
+        for(int i = 0; i < signos.size(); i++){
             if(signos[i].first and !signos[i].second)
                 cout << "+";
             else if(!signos[i].first and signos[i].second)
                 cout << "-";
             else
                 cout << '?';
-        }*/
+        }
+        cout << endl;
     }
 
     return 0;
