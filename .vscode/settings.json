@@ -1,6 +1,7 @@
 {
     "C_Cpp.default.compilerPath": "/usr/bin/g++",
     "files.associations": {
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "iostream": "cpp"
     }
 }
