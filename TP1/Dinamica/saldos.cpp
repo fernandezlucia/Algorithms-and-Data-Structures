@@ -5,8 +5,8 @@
 using namespace std;
 int offset;
 vector<int> valores = vector<int>(101, 0);
-vector<vector<int> > memo = vector<vector<int> >(101, vector<int>((2*10000*100) + 1, -1));
-vector<pair<bool, bool> > signos = vector<pair<bool, bool>>(101, make_pair(false,false));
+vector<vector<int> > memo = vector<vector<int> >(101, vector<int>((2*100*100) + 1, -1));
+vector<pair<bool, bool> > signos = vector<pair<bool, bool> >(101, make_pair(false,false));
 
 bool saldos(int i, int acumulado, int w, vector<int>& v, vector<vector<int> >& memo, vector<pair<bool, bool> >& signos){
     if(i == 0)
@@ -39,10 +39,12 @@ int main() {
         for(int x = 0; x < n; x++){
             int val;
             cin >> val;
-            valores[x] = val;
+            valores[x] = val/100;
         }
 
-        offset = 10000*n;
+        offset = 100*n;
+        w /= 100;
+
         if(!saldos(n, w, w, valores, memo, signos)){
             cout << "imposible" << endl;
             continue;
