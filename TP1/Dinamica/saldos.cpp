@@ -4,13 +4,13 @@
 
 using namespace std;
 int offset;
-vector<int> valores = vector<int>(100, 0);
-vector<vector<int> > memo = vector<vector<int> >(101, vector<int>((2*100*100)+1, -1));
-vector<pair<bool, bool> > signos = vector<pair<bool, bool>>(100, make_pair(false,false));
+vector<int> valores = vector<int>(101, 0);
+vector<vector<int> > memo = vector<vector<int> >(101, vector<int>((2*10000*100) + 1, -1));
+vector<pair<bool, bool> > signos = vector<pair<bool, bool>>(101, make_pair(false,false));
 
 bool saldos(int i, int acumulado, int w, vector<int>& v, vector<vector<int> >& memo, vector<pair<bool, bool> >& signos){
     if(i == 0)
-        return acumulado == w;
+        return acumulado == 0;
     if(memo[i][acumulado+offset] == -1){
         bool sumar = saldos(i-1, acumulado+v[i-1], w, v, memo, signos);
         bool restar = saldos(i-1, acumulado-v[i-1], w, v, memo, signos);
@@ -39,16 +39,22 @@ int main() {
         for(int x = 0; x < n; x++){
             int val;
             cin >> val;
-            val = val / 100;
             valores[x] = val;
         }
 
-        offset = 100*n;
-        w = w / 100;
-        saldos(n, 0, w, valores, memo, signos);
+        offset = 10000*n;
+        if(!saldos(n, w, w, valores, memo, signos)){
+            cout << "imposible" << endl;
+            continue;
+        }
 
-        for (int i = 0; i < n; i++) {
-            cout << (signos[i].first && !signos[i].second ? "+" : (signos[i].second && !signos[i].first ? "-" : "?"));
+        for(int i = 0; i < n; i++){
+            if(signos[i].first and !signos[i].second)
+                cout << "-";
+            else if(!signos[i].first and signos[i].second)
+                cout << "+";
+            else
+                cout << '?';
         }
         cout << endl;
 
@@ -68,5 +74,3 @@ int main() {
 
     return 0;
 }
-
-
