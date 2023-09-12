@@ -4,13 +4,11 @@
 #include <limits.h>
 using namespace std;
 
-int cant_puestos;
-int cant_proveedurias;  
-int costo_minimo = INT_MAX;
+int k = 3;  //provedurias
+int n = 5;  //puestos
 vector<int> posiciones_puestos;
-vector<vector<int>> memo;
-
-#define INDEFINIDO -1
+vector<int> proveeduria_mas_cercana;
+int costo_minimo = INT_MAX;
 
 void printVector(vector<int> const &a){
     for(int i = 0; i < a.size(); i++){
@@ -19,36 +17,78 @@ void printVector(vector<int> const &a){
     cout << endl;
 }
 
-int ubicarProveedurias(int n, int k, vector<int>& proveedurias_colocadas, vector<vector<int>> memo){
-    int costo_poner_prov, costo_no_poner_prov;
-    
-    if(k == 0){
-        if(n == 0){
-            return costo_minimo;
+void recalcularProveeduriasCercanas(vector<int> posibles_ubicaciones){
+    int ultima_proveeduria_vista;
+    int prox_proveeduria;
+
+    for(int i = 0; i < n; i++){
+        //si hay una proveeeduria en mi puesto;
+        if(posiciones_puestos[i] == posibles_ubicaciones.back()){
+            for(int j = i; j < n; j++)
+                proveeduria_mas_cercana[j] = posibles_ubicaciones.back();
+            break;
+            
+        }else if(posibles_ubicaciones[i] == posiciones_puestos[i]){
+            // entonces la proveeduria mas cercana soy yo y soy la ultima proveeduria que vi
+            proveeduria_mas_cercana[i] = posibles_ubicaciones[i];  
+            ultima_proveeduria_vista = i;
+
+            // si no hay una proveeduria en esta posicion    
+        } else {
+                //busco la proxima
+            while(posiciones_puestos[i] && posibles_ubicaciones[i+1] && posiciones_puestos[i] != posibles_ubicaciones[i+1])
+                i++;
+            prox_proveeduria = i;
+            // itero entre la ultima que vi y la proxima seteando la mas cercana de las del medio  
+            for(int j = ultima_proveeduria_vista; j <= i; j++){
+                if(abs(posiciones_puestos[j] - posibles_ubicaciones[ultima_proveeduria_vista]) > abs(posiciones_puestos[j] - posibles_ubicaciones[prox_proveeduria]))
+                    proveeduria_mas_cercana[j] = posibles_ubicaciones[prox_proveeduria];
+                else 
+                    proveeduria_mas_cercana[j] = posibles_ubicaciones[ultima_proveeduria_vista];
+            }
+            ultima_proveeduria_vista = prox_proveeduria;
         }
-        else
-            return INT_MAX;
     }
-    
-    if(n == 0)
+}
+
+int calcularCosto(int i){
+    int nuevo_costo;
+    for(int j = 0; j < i; j++){
+        nuevo_costo += abs(posiciones_puestos[j] - proveeduria_mas_cercana[j]);
+    }
+    return nuevo_costo;
+}
+
+int ubicarProveedurias(vector<int>& posibles_ubicaciones, int cant_prov, int i, int costo){
+    int costo_actual;
+    int costo_anterior = costo;
+
+    if(cant_prov > k)
         return INT_MAX;
 
-    if(memo[n][k] != INDEFINIDO)
-        return memo[n][k];
+    if(i == n){
+        printVector(posibles_ubicaciones);
+        return costo_minimo;
+    }
+
+    posibles_ubicaciones.push_back(posiciones_puestos[i]);
+    //cout << cant_prov << " " << i << " " << costo << endl;
+    recalcularProveeduriasCercanas(posibles_ubicaciones);
+
+    costo_actual = calcularCosto(i);
+    if(costo_actual >= costo_minimo)
+        return INT_MAX;
+    else
+        costo_minimo = costo_actual;
+
+
+    int pongo_prov = ubicarProveedurias(posibles_ubicaciones, cant_prov+1, i+1, costo_actual);
+
+
+    posibles_ubicaciones.pop_back();
+    int no_pongo = ubicarProveedurias(posibles_ubicaciones, cant_prov, i+1, costo_anterior);
     
-
-    proveedurias_colocadas[cant_puestos-n-1] = posiciones_puestos[cant_puestos-n-1];
-    costo_poner_prov = ubicarProveedurias(n-1, k-1, proveedurias_colocadas, memo);
-    
-    proveedurias_colocadas[cant_puestos-n-1] = 0;
-    costo_no_poner_prov = ubicarProveedurias(n-1, k, proveedurias_colocadas, memo);
-    printVector(proveedurias_colocadas);
-
-    if(costo_poner_prov < costo_minimo || costo_no_poner_prov < costo_minimo)
-        costo_minimo = min(costo_poner_prov, costo_no_poner_prov);
-
-    memo[n][k] = costo_minimo;
-    return costo_minimo;
+    return min(pongo_prov, no_pongo);
 }
 
 
@@ -58,48 +98,24 @@ int main(){
     cin >> casos;
     
     for(int caso = 0; caso < casos; caso++){
-        cin >> cant_puestos >> cant_proveedurias;
+        cin >> n >> k;
 
         posiciones_puestos = vector<int>();
         
-        for(int i = 0; i < cant_proveedurias; i++){
+        for(int i = 0; i < n; i++){
             int puesto_i;
             cin >> puesto_i;
             posiciones_puestos.push_back(puesto_i);
         }
-        
-        vector<int> proveedurias_colocadas(cant_proveedurias, 0);
-        vector<vector<int>> memo(cant_puestos, vector<int>(cant_proveedurias, INDEFINIDO));
-    
-        //solucion
-        ubicarProveedurias(cant_puestos-1, cant_proveedurias-1, proveedurias_colocadas, memo);        
+
+    //solucion
+        vector<int> posibles_ubicaciones = {};
+        ubicarProveedurias(posibles_ubicaciones, 0, 0, 0);
+                
 
     }
 
 
 
     return 0;
-}
-
-
-void ubicarProveedurias(vector<int> posibles_ubicaciones, int i, int cant_prov, int cant_vacio){
-   
-    if(cant_prov > k || cant_vacio > (n - k))
-        return;
-    
-    //caso base 
-    if(i == n){
-        printVector(posibles_ubicaciones);
-        return;
-    }
-    
-    //ponemos una proveeduria en la posicion i
-    posibles_ubicaciones[i] = posiciones_puestos[i];
-    ubicarProveedurias(posibles_ubicaciones, i+1, cant_prov + 1, cant_vacio);
-
-    //no la ponemos
-    posibles_ubicaciones[i] = 0;
-    ubicarProveedurias(posibles_ubicaciones, i+1, cant_prov, cant_vacio + 1);
-    
-    return;
 }
