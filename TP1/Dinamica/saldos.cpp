@@ -3,6 +3,7 @@
 #include <algorithm>
 
 using namespace std;
+
 int offset;
 vector<int> valores = vector<int>(101, 0);
 vector<vector<int> > memo = vector<vector<int> >(101, vector<int>((2*100*100) + 1, -1));
@@ -14,6 +15,7 @@ bool saldos(int i, int acumulado, int w, vector<int>& v, vector<vector<int> >& m
     if(i == 0)
         //si pudimos llegar a 0 partiendo de w quiere decir que hubo combinación de sumas o restas que daban el objetivo
         return acumulado == 0;
+        
     if(memo[i][acumulado+offset] == -1){
         bool sumar = saldos(i-1, acumulado+v[i-1], w, v, memo, signos);
         bool restar = saldos(i-1, acumulado-v[i-1], w, v, memo, signos);
