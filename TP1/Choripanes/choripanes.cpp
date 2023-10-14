@@ -62,6 +62,7 @@ int colocarProveedurias(vector<int>& proveedurias_colocadas, int index, int prov
 
     if(proveedurias_actuales == proveedurias_target){
         cout << costo_minimo << endl;
+        
         printVector(proveedurias_colocadas);
         return costo_minimo;
     }
