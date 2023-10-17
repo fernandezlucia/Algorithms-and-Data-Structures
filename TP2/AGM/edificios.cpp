@@ -7,100 +7,103 @@
 
 using namespace std;
 
-const int inf = INT_MAX;
+const long long inf = 1e18;
+
+struct Arista{
+    int dst;
+    int d;
+    int r;
+};
 
 int edificios;
 int cant_conexiones;
-vector<vector<pair<int, int>>> matriz_ady;
-vector<vector<int>> frontera;
-vector<bool> en_frontera;
+vector<vector<Arista>> ady;
 
-void printVectorOfVectors(const std::vector<std::vector<int>>& vec) {
-    for (const std::vector<int>& innerVec : vec) {
-        for (int element : innerVec) {
-            std::cout << element << " ";
-        }
-        std::cout << std::endl;
-    }
-}
-void agregarAFrontera(int v, vector<pair<int, int>> vencindario, vector<bool> visitado){
-   for(int i = 0; i < edificios; ++i){
-        if(matriz_ady[v][i].first != inf && !visitado[i]){
-            frontera.push_back({v, i, matriz_ady[v][i].first, matriz_ady[v][i].second});
-        }
-   }
-}
+int totalDG;
+int totalDR;
+double epsilon = 1e-4;
 
-int maximoVecino(float& D, float& R){
-    int d = frontera[0][2];
-    int r = frontera[0][3];
-    int v = 0;
-
-    
-    int res = 0;
-
-    for(int i = 1; i < frontera.size(); ++i){      
-        if((D + d)/(R + r) < (D + frontera[i][2])/(R + frontera[i][3])){
-            d =  frontera[i][2];
-            r =  frontera[i][3];
-            v = i;
-        }
-    }
-
-    D += frontera[v][2];
-    R += frontera[v][3];
-
-    cout << D << " " << R<< endl;
-    res = frontera[v][1];
-    frontera.erase(frontera.begin() + v);
-    return res;
-}
-
-void prim(){
+tuple<bool, int, int> esValido(float C) {
+    priority_queue<tuple<float, int, int, int>> pq;
     vector<bool> visitado(edificios, false);
-    int aristas_colocadas = 0;
-    float D = 0;
-    float R = 0; 
-
-
-    agregarAFrontera(0, matriz_ady[0], visitado);      
-
-    visitado[0] = true;
-    while(frontera.size() != 0){
-        int e = maximoVecino(D, R);
-        if(!visitado[e]){
-            visitado[e] = true;
-            agregarAFrontera(e, matriz_ady[e], visitado);
-            aristas_colocadas++;
-        }
-                printVectorOfVectors(frontera);
+    
+    for(Arista e : ady[0]){
+        pq.push({(e.d - C * e.r), e.dst,e.d,e.r});
     }
+    
+    visitado[0] = true;
+    int edges = 0;
+    int totalD = 0;
+    int totalR = 0;
+    
+    while(!pq.empty()) {
+        int value;
+        int dst;
+        int d,r;
+        tie(value, dst, d,r) = pq.top();
+        pq.pop();
+        
+        if(!visitado[dst]){
+            visitado[dst] = true;
 
-    if(aristas_colocadas == edificios - 1)
-        cout << D << " " << R << endl;
+            totalD += d;
+            totalR += r;
+
+            for(Arista e : ady[dst]){
+                if(e.d != inf && !visitado[e.dst]){
+                    float cost = (e.d - C * e.r);
+                    pq.push({cost, e.dst, e.d, e.r});
+                }
+            }
+            edges++;
+        }
+    }
+    
+    if(edges != edificios-1) return {0,0,0};
+    
+    bool res = ((float)totalD / (float)totalR) >= C;
+    return {res, totalD, totalR};
 }
 
+void solve() {
+    double low = 0, high = 10e6, mid;
+    int D, R;
+    while(high-low > epsilon){
+        mid = (low + high) / 2.0;
+        bool valido;
+        int d, r;
+        tie(valido, d, r) = esValido(mid);
+        if(valido) {
+            low = mid;
+            D = d;
+            R = r;
+        } else {
+            high = mid;
+        }
+    }
+    cout << D << " " << R << endl;
+}
 
 int main(){
     int casos;
-    
     cin >> casos;
 
-    for(int c = 0; c < casos; ++c){
+    while(casos--){
         cin >> edificios >> cant_conexiones;
 
-        matriz_ady =  vector<vector<pair<int, int>>>(edificios, vector<pair<int, int>>(cant_conexiones, {inf, inf}));
-        frontera = vector<vector<int>>(0);
-    en_frontera = vector<bool>(edificios, false);
+        ady = vector<vector<Arista>>(edificios);
+
         for(int i = 0; i < cant_conexiones; ++i){
-            int e1, e2, d, r;
+            int e1, e2;
+            int d, r;
             cin >> e1 >> e2 >> d >> r;
-            matriz_ady[e1-1][e2-1] = {d, r};
-            matriz_ady[e2-1][e1-1] = {d, r};
+            e1--; e2--;
+            ady[e1].push_back({e2, d, r});
+            ady[e2].push_back({e1, d, r});
         }
-        prim();
+
+        solve();
     }
 
-
-    return 0;
+   return 0;
 }
