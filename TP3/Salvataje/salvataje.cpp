@@ -93,7 +93,6 @@ int main(){
         }
 
 
-        //Devolver MINIMO TIEMPO POSIBLE EN LLEGAR A ULTIMO SALON
         //printMatrix(grafo);
         dijkstra(grafo, 0);
         
