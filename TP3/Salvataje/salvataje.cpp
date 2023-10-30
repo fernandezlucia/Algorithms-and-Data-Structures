@@ -19,8 +19,8 @@ using namespace std;
 
 int cant_salones;
 
-void printVector(vector<vector<int>> &graph){
-    for(vector<int> i : graph){
+void printMatrix(vector<vector<int>> &grafo){
+    for(vector<int> i : grafo){
         cout << "(";
         for(int l = 0; l < i.size(); l++)
             cout << i[l] << " ";
@@ -28,50 +28,41 @@ void printVector(vector<vector<int>> &graph){
     }
 }
 
-void printOnlyVector(vector<int> v){
+void printVector(vector<int> &v){
     for(int i : v)
         cout << v[i] << " ";
     cout << endl;
 }
 
-int minDistance(vector<int> dist, vector<bool> sptSet){
+int distanciaMinima(vector<int> dist, vector<bool> spt){
     int min = INT_MAX, min_index;
  
     for (int v = 0; v < cant_salones; v++)
-        if (sptSet[v] == false && dist[v] <= min)
+        if (spt[v] == false && dist[v] <= min)
             min = dist[v], min_index = v;
  
     return min_index;
 }
 
-void printSolution(vector<int> dist, int n){
-    int N = dist.size();
-    cout << dist[N-1] + 1 << endl; //RESPUESTA
 
-}
-
-//int graph[cant_salones][cant_salones]
-void dijkstra(vector<vector<int>> &graph, int src){
-    vector<int> dist(cant_salones, INT_MAX);
-    vector<bool> sptSet(cant_salones, false);
-
-    //for (int i = 0; i < cant_salones; i++)
-    //    dist[i] = INT_MAX, sptSet[i] = false;
+void dijkstra(vector<vector<int>> &grafo, int src){
+    vector<int> dist(cant_salones, INT_MAX);    //dist guarda la distancia mas corta del origen hasta i
+    vector<bool> spt(cant_salones, false);     //spt es true sii el nodo i esta incluido en shortest path tree o si ya se sabe la menor distancia del origen a i
  
     dist[src] = 0;
  
     for (int count = 0; count < cant_salones - 1; count++) {
-        int u = minDistance(dist, sptSet);
+        int u = distanciaMinima(dist, spt);
 
-        sptSet[u] = true;
+        spt[u] = true;
         for (int v = 0; v < cant_salones; v++)
-            if (!sptSet[v] && graph[u][v]
-                && dist[u] != INT_MAX
-                && dist[u] + graph[u][v] < dist[v])
-                dist[v] = dist[u] + graph[u][v];
+            if (!spt[v] && grafo[u][v] && dist[u] != INT_MAX && dist[u] + grafo[u][v] < dist[v])
+                dist[v] = dist[u] + grafo[u][v];
     }
-    //printOnlyVector(dist);
-    printSolution(dist, cant_salones);
+    printVector(dist);
+    //int N = dist.size();
+    cout << dist[dist.size()-1] + 1 << endl; // sumo 1 a la respuesta pq hay que considerar que entrar al primer salon (1er nodo) tambien tarda 1 min
+    //printSolution(dist, cant_salones);
 }
 
 
@@ -82,13 +73,13 @@ int main(){
 
     for(int i = 0; i < c; i++){
         cin >> cant_salones >> cant_tuneles;
-        vector<vector<int>> graph(cant_salones, vector<int>(cant_salones,0));
+        vector<vector<int>> grafo(cant_salones, vector<int>(cant_salones,0));
 
         for(int k = 0; k < cant_salones; k++){
             if(k == cant_salones-1)
                 continue;
             else
-                graph[k][k+1] = 1;
+                grafo[k][k+1] = 1;  // cada nodo (salon) tiene una arista dirigida al siguiente nodo con peso 1 (pq tarda 1 min en saltar la muralla)
             
         }
 
@@ -97,13 +88,14 @@ int main(){
             int inicio, fin;
             cin >> inicio >> fin;
 
-            graph[inicio-1][fin-1] = 2;
+            grafo[inicio-1][fin-1] = 2;  // resto 1 en inicio y fin pq vectores empiezan con 0 y los casos de test empiezan en 1
+                                         // le asigno 2 a la arista pq tarda 2 min en atravezar el tunel
         }
 
 
         //Devolver MINIMO TIEMPO POSIBLE EN LLEGAR A ULTIMO SALON
-        //printVector(graph);
-        dijkstra(graph, 0);
+        //printMatrix(grafo);
+        dijkstra(grafo, 0);
         
     }
 
