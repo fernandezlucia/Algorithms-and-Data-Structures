@@ -85,21 +85,26 @@ int main(){
         vector<vector<int>> graph(cant_salones, vector<int>(cant_salones,0));
 
         for(int k = 0; k < cant_salones; k++){
-            graph[k][k+1] = 1;
+            if(k == cant_salones-1)
+                continue;
+            else
+                graph[k][k+1] = 1;
+            
         }
 
 
         for(int j = 0; j < cant_tuneles; j++){
             int inicio, fin;
             cin >> inicio >> fin;
-            graph[inicio-1][fin-1] = 2;            
+
+            graph[inicio-1][fin-1] = 2;
         }
 
 
         //Devolver MINIMO TIEMPO POSIBLE EN LLEGAR A ULTIMO SALON
         //printVector(graph);
         dijkstra(graph, 0);
-        //graph.clear();
+        
     }
 
     return 0;
