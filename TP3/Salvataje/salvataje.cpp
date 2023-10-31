@@ -10,7 +10,7 @@ using namespace std;
 // fortaleza: N salones divididos por murallas
 // Escalar muralla   -> 1 min
 // Recorrer pasadizo -> 2 min
-// Maximos pasadizos que se pueden recorrer por caso: 3
+// Maximos pasadizos que se pueden recorrer por caso: 3  ---> falta esto
 // No se puede ir hacia salones anteriores
 // No se puede entrar a un pasadizo desde su salida
 
