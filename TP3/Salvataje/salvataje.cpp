@@ -45,11 +45,6 @@ void sortVectorOfTuplesBySecondElement(vector<tuple<int, int, int>>& tuples) {
     sort(tuples.begin(), tuples.end(), compareSecondElement);
 }
 
-void medir(int inicio, int fin){    //se asegura de guardar en pasadizos solo los que cubran mayor cantidad de murallas hasta 3
-    int cubre = fin - inicio;
-    pasadizos.push_back({inicio-1, fin-1, cubre});    
-}
-
 bool esTunel(int u, int v, vector<tuple<int, int, int>>& tuneles){     //se fija si la arista vista es alguna de las que forman un pasadizo y cubren mayor cant. de murallas (lsa que se guardan en tuneles)
     bool es_igual = false;
 
@@ -147,8 +142,9 @@ int main(){
         for(int j = 0; j < cant_tuneles; j++){
             int inicio, fin;
             cin >> inicio >> fin;
-            medir(inicio, fin);
-
+            int cubre = fin - inicio;
+            
+            pasadizos.push_back({inicio-1, fin-1, cubre});    
             grafo[inicio-1][fin-1] = 2;  // resto 1 en inicio y fin pq vectores empiezan con 0 y los casos de test empiezan en 1
                                          // le asigno 2 a la arista pq tarda 2 min en atravezar el tunel
         }
