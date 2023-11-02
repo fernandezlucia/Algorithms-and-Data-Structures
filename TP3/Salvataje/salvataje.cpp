@@ -1,7 +1,6 @@
-#include<iostream>
-#include<vector>
-#include<algorithm>
-#include <queue>
+#include <iostream>
+#include <vector>
+#include <algorithm>
 #include <tuple>
 #include <limits.h>
 
@@ -13,8 +12,7 @@ using namespace std;
 // Maximos pasadizos que se pueden recorrer por caso: 3 
 // No se puede ir hacia salones anteriores
 // No se puede entrar a un pasadizo desde su salida
-
-// Entrar al primer salon tambien tarda 1 minuto !!!!!
+// Entrar al primer salon tambien tarda 1 minuto !
 
 
 int cant_salones;
@@ -63,13 +61,13 @@ void getMax(vector<tuple<int, int, int>>& pasadizos, vector<tuple<int, int, int>
     if (pasadizos.size() != 0){
 
         tuneles.push_back(pasadizos[0]);
-        pasadizos.erase(pasadizos.begin());
+        //pasadizos.erase(pasadizos.begin());
     
 
         for (int i = 0; i < pasadizos.size(); i++){
             if(get<0>(pasadizos[i]) >= get<1>(tuneles[0]) || get<1>(pasadizos[i]) <= get<0>(tuneles[0])){ 
                 tuneles.push_back(pasadizos[i]);
-                pasadizos.erase(pasadizos.begin());
+                //pasadizos.erase(pasadizos.begin());
                 break;
             }
         } 
@@ -78,7 +76,7 @@ void getMax(vector<tuple<int, int, int>>& pasadizos, vector<tuple<int, int, int>
             if( (get<0>(pasadizos[i]) >= get<1>(tuneles[0]) || get<1>(pasadizos[i]) <= get<0>(tuneles[0]) ) &&
                 (get<0>(pasadizos[i]) >= get<1>(tuneles[1]) || get<1>(pasadizos[i]) <= get<0>(tuneles[1]) ) ){
                 tuneles.push_back(pasadizos[i]);
-                pasadizos.erase(pasadizos.begin());
+                //pasadizos.erase(pasadizos.begin());
                 break;
             }
         } 
@@ -142,11 +140,12 @@ int main(){
         for(int j = 0; j < cant_tuneles; j++){
             int inicio, fin;
             cin >> inicio >> fin;
-            int cubre = fin - inicio;
-            
-            pasadizos.push_back({inicio-1, fin-1, cubre});    
             grafo[inicio-1][fin-1] = 2;  // resto 1 en inicio y fin pq vectores empiezan con 0 y los casos de test empiezan en 1
                                          // le asigno 2 a la arista pq tarda 2 min en atravezar el tunel
+            
+            int cubre = fin - inicio;
+            if(cubre > 2)
+                pasadizos.push_back({inicio-1, fin-1, cubre});    
         }
 
         sortVectorOfTuplesByThirdElement(pasadizos);
