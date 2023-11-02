@@ -11,7 +11,7 @@ using namespace std;
 // Escalar muralla   -> 1 min
 // Recorrer pasadizo -> 2 min
 // Maximos pasadizos que se pueden recorrer por caso: 3 
-// No se puede ir hacia salones anteriores               <---- FALTA ESTO
+// No se puede ir hacia salones anteriores
 // No se puede entrar a un pasadizo desde su salida
 
 // Entrar al primer salon tambien tarda 1 minuto !!!!!
