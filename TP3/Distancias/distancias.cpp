@@ -50,18 +50,21 @@ void printSolution(vector<vector<int>> &matriz_dist){
 
 void floyd(vector<vector<int>> &dist, vector<vector<int>> &res){
 	int i, j, k;
+    bool not_pos = false;
 	for (k = 0; k < n; k++) {
 		for (i = 0; i < n; i++) {
 			for (j = 0; j < n; j++) {
 				if (dist[i][j] == (dist[i][k] + dist[k][j])	&& (dist[k][j] != INF && dist[i][k] != INF)){
 					dist[i][j] = dist[i][k] + dist[k][j];
                     res[i][j] = res[i][j] + 1;
+                } else if (dist[i][j] > (dist[i][k] + dist[k][j])){
+                    not_pos = true;
                 }
 			}
 		}
 	}
 
-    if(false){ // COMPLETAR
+    if(not_pos){ // COMPLETAR
         cout << "IMPOSIBLE" <<  endl;
     } else {
         cout << "POSIBLE" <<  endl;
@@ -88,7 +91,7 @@ int main(){
                 matriz_ady[j][i+1] = temp;
             }
         }
-        printMatrix(matriz_ady);
+        //printMatrix(matriz_ady);
         floyd(matriz_ady, matriz_dist);
 
         matriz_ady.clear();
