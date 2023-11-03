@@ -34,7 +34,6 @@ void printVector(vector<int> &v){
     cout << endl;
 }
 
-
 void printSolution(vector<vector<int>> &matriz_dist){
     for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
@@ -49,17 +48,25 @@ void printSolution(vector<vector<int>> &matriz_dist){
 }
 
 
-void floyd(vector<vector<int>> &dist){
+void floyd(vector<vector<int>> &dist, vector<vector<int>> &res){
 	int i, j, k;
 	for (k = 0; k < n; k++) {
 		for (i = 0; i < n; i++) {
 			for (j = 0; j < n; j++) {
-				if (dist[i][j] > (dist[i][k] + dist[k][j])	&& (dist[k][j] != INF && dist[i][k] != INF))
+				if (dist[i][j] == (dist[i][k] + dist[k][j])	&& (dist[k][j] != INF && dist[i][k] != INF)){
 					dist[i][j] = dist[i][k] + dist[k][j];
+                    res[i][j] = res[i][j] + 1;
+                }
 			}
 		}
 	}
-	printSolution(dist);
+
+    if(false){ // COMPLETAR
+        cout << "IMPOSIBLE" <<  endl;
+    } else {
+        cout << "POSIBLE" <<  endl;
+	    printSolution(res);
+    }
 }
 
 
@@ -71,7 +78,7 @@ int main(){
     for(int k = 0; k < c; k++){
         cin >> n;
         vector<vector<int>> matriz_ady(n, vector<int>(n,0));
-        vector<vector<int>> matriz_dist(n, vector<int>(n,0));
+        vector<vector<int>> matriz_dist(n, vector<int>(n,-1));
 
         for(int i = 0; i < n-1; i++){
             for(int j = 0; j < i+1; j++){
@@ -79,20 +86,10 @@ int main(){
                 cin >> temp;
                 matriz_ady[i+1][j] = temp;
                 matriz_ady[j][i+1] = temp;
-                matriz_dist[i+1][j] = temp;
-                matriz_dist[j][i+1] = temp;
             }
         }
-        //cout << "llego1" << endl;
-        //printMatrix(matriz_ady);
-        floyd(matriz_dist);
-
-
-
-        if(false){
-            cout << "IMPOSIBLE" <<  endl;
-        }
-
+        printMatrix(matriz_ady);
+        floyd(matriz_ady, matriz_dist);
 
         matriz_ady.clear();
         matriz_dist.clear();
