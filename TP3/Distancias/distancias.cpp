@@ -6,6 +6,9 @@
 
 using namespace std;
 
+#define INF INT_MAX
+
+int n;
 // DIST DE CONEXION(u,v) = minima cant. de enlaces para ir de u a v
 // LATENCIA(u,v) = minima cant. de tiempo (en milisegundos > 0) que se tarde en ir de u a v
 
@@ -31,8 +34,38 @@ void printVector(vector<int> &v){
     cout << endl;
 }
 
+
+void printSolution(vector<vector<int>> &matriz_dist){
+    for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			if (matriz_dist[i][j] == INF)
+				cout << "INF"
+					<< " ";
+			else
+				cout << matriz_dist[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+
+void floyd(vector<vector<int>> &dist){
+	int i, j, k;
+	for (k = 0; k < n; k++) {
+		for (i = 0; i < n; i++) {
+			for (j = 0; j < n; j++) {
+				if (dist[i][j] > (dist[i][k] + dist[k][j])	&& (dist[k][j] != INF && dist[i][k] != INF))
+					dist[i][j] = dist[i][k] + dist[k][j];
+			}
+		}
+	}
+	printSolution(dist);
+}
+
+
+
 int main(){
-    int c, n;
+    int c;
     cin >> c;
 
     for(int k = 0; k < c; k++){
@@ -46,9 +79,23 @@ int main(){
                 cin >> temp;
                 matriz_ady[i+1][j] = temp;
                 matriz_ady[j][i+1] = temp;
+                matriz_dist[i+1][j] = temp;
+                matriz_dist[j][i+1] = temp;
             }
         }
-        printMatrix(matriz_ady);
+        //cout << "llego1" << endl;
+        //printMatrix(matriz_ady);
+        floyd(matriz_dist);
+
+
+
+        if(false){
+            cout << "IMPOSIBLE" <<  endl;
+        }
+
+
+        matriz_ady.clear();
+        matriz_dist.clear();
     }
     return 0;
 }
