@@ -28,12 +28,6 @@ void printMatrix(vector<vector<int>> &grafo){
     }
 }
 
-void printVector(vector<int> &v){
-    for(int i : v)
-        cout << v[i] << " ";
-    cout << endl;
-}
-
 void printSolution(vector<vector<int>> &matriz_dist){
     for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
@@ -48,31 +42,27 @@ void printSolution(vector<vector<int>> &matriz_dist){
 }
 
 
-void floyd(vector<vector<int>> &dist, vector<vector<int>> &res){
+void floyd(vector<vector<int>> &ady, vector<vector<int>> &dist){
 	int i, j, k;
     bool not_pos = false;
 	for (k = 0; k < n; k++) {
 		for (i = 0; i < n; i++) {
 			for (j = 0; j < n; j++) {
-				if (dist[i][j] == (dist[i][k] + dist[k][j])	&& (dist[k][j] != INF && dist[i][k] != INF)){
-					dist[i][j] = dist[i][k] + dist[k][j];
-                    res[i][j] = res[i][j] + 1;
-                } else if (dist[i][j] > (dist[i][k] + dist[k][j])){
+				if (ady[i][j] == (ady[i][k] + ady[k][j]))
+                    dist[i][j] = dist[i][j] + 1;
+                else if (ady[i][j] > (ady[i][k] + ady[k][j]))
                     not_pos = true;
-                }
 			}
 		}
 	}
 
-    if(not_pos){ // COMPLETAR
+    if(not_pos){ 
         cout << "IMPOSIBLE" <<  endl;
     } else {
         cout << "POSIBLE" <<  endl;
-	    printSolution(res);
+	    printSolution(dist);
     }
 }
-
-
 
 int main(){
     int c;
