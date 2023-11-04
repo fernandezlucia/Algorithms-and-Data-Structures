@@ -14,42 +14,46 @@ using namespace std;
 // No se puede entrar a un pasadizo desde su salida
 // Entrar al primer salon tambien tarda 1 minuto !
 
+//Todo caso de test debe tener al menos 1 tunel
+
+struct Tunel{
+    int inicio;
+    int fin;
+    int cubren;
+};
 
 int cant_salones;
-vector<tuple<int, int, int>> pasadizos;
-vector<tuple<int, int, int>> tuneles1;
-vector<tuple<int, int, int>> tuneles2;
+vector<Tunel> pasadizos;
+vector<Tunel> tuneles;
 
-
-void printVectorTuplas(vector<tuple<int, int, int>> &pasadizos){
-    for(tuple<int, int, int> i : pasadizos){
-        cout << "(" << get<0>(i) << ", " << get<1>(i) << ", " << get<2>(i) << ")" << endl;
+void printVectorTuplas(vector<Tunel> &pasadizos){
+    for(Tunel i : pasadizos){
+        cout << "(" << i.inicio << ", " << i.fin << ", " << i.cubren << ")" << endl;
     }
 }
 
-bool compareThirdElement(const tuple<int, int, int>& a, const tuple<int, int, int>& b) {
-    return get<2>(a) > get<2>(b);
+bool compareThirdElement(const Tunel& a, const Tunel& b) {
+    return a.cubren > b.cubren;
 }
 
-bool compareSecondElement(const tuple<int, int, int>& a, const tuple<int, int, int>& b) {
-    return get<1>(a) > get<1>(b);
+bool compareSecondElement(const Tunel& a, const Tunel& b) {
+    return a.fin > b.fin;
+}
+void sortVectorOfTuplesByThirdElement(vector<Tunel>& tuples) {
+    stable_sort(tuples.begin(), tuples.end(), compareThirdElement);
 }
 
-void sortVectorOfTuplesByThirdElement(vector<tuple<int, int, int>>& tuples) {
-    sort(tuples.begin(), tuples.end(), compareThirdElement);
+void sortVectorOfTuplesBySecondElement(vector<Tunel>& tuples) {
+    stable_sort(tuples.begin(), tuples.end(), compareSecondElement);
 }
 
-void sortVectorOfTuplesBySecondElement(vector<tuple<int, int, int>>& tuples) {
-    sort(tuples.begin(), tuples.end(), compareSecondElement);
-}
-
-bool esTunel(int u, int v, vector<tuple<int, int, int>>& tuneles){     //se fija si la arista vista es alguna de las que forman un pasadizo y cubren mayor cant. de murallas (lsa que se guardan en tuneles)
+bool esTunel(int u, int v, vector<Tunel>& tuneles){     //se fija si la arista vista es alguna de las que forman un pasadizo y cubren mayor cant. de murallas (lsa que se guardan en tuneles)
     bool es_igual = false;
 
     if(tuneles.size() != 0){
-        if( (u == get<0>(tuneles[0]) && v == get<1>(tuneles[0])) ||
-            (u == get<0>(tuneles[1]) && v == get<1>(tuneles[1])) ||
-            (u == get<0>(tuneles[2]) && v == get<1>(tuneles[2])) ){
+        if  (u == tuneles[0].inicio && v == tuneles[0].fin ||
+             u == tuneles[1].inicio && v == tuneles[1].fin ||
+             u == tuneles[2].inicio && v == tuneles[2].fin ){
                 es_igual = true;
             }
     }
@@ -57,31 +61,30 @@ bool esTunel(int u, int v, vector<tuple<int, int, int>>& tuneles){     //se fija
     return es_igual;
 }
 
-void getMax(vector<tuple<int, int, int>>& pasadizos, vector<tuple<int, int, int>>& tuneles){ //busca las tres tuneles que cubran mayor cant de murallas y no se pisen
-    if (pasadizos.size() != 0){
-
-        tuneles.push_back(pasadizos[0]);
-        //pasadizos.erase(pasadizos.begin());
-    
-
-        for (int i = 0; i < pasadizos.size(); i++){
-            if(get<0>(pasadizos[i]) >= get<1>(tuneles[0]) || get<1>(pasadizos[i]) <= get<0>(tuneles[0])){ 
-                tuneles.push_back(pasadizos[i]);
-                //pasadizos.erase(pasadizos.begin());
-                break;
-            }
-        } 
-
-        for (int i = 0; i < pasadizos.size(); i++){
-            if( (get<0>(pasadizos[i]) >= get<1>(tuneles[0]) || get<1>(pasadizos[i]) <= get<0>(tuneles[0]) ) &&
-                (get<0>(pasadizos[i]) >= get<1>(tuneles[1]) || get<1>(pasadizos[i]) <= get<0>(tuneles[1]) ) ){
-                tuneles.push_back(pasadizos[i]);
-                //pasadizos.erase(pasadizos.begin());
-                break;
-            }
-        } 
+void getMax(vector<Tunel> &pasadizos, vector<Tunel> &tuneles){ // busca las tres tuneles que cubran mayor cant de murallas y no se pisen
+    if (pasadizos.size() == 0)
+        return;
+    // ordenados de mayor a menor en cubrimiento
+    tuneles.push_back(pasadizos[0]);
+    int lastI = 0;
+    for (int i = 1; i < pasadizos.size(); i++){
+        if (pasadizos[i].inicio >= tuneles[0].fin || pasadizos[i].fin <= tuneles[0].inicio){
+            tuneles.push_back(pasadizos[i]);
+            lastI = i;
+            break;
+        }
     }
-    
+
+    for (int i = lastI; i < pasadizos.size(); i++){
+
+        if(pasadizos[i].fin > tuneles[0].inicio && pasadizos[i].inicio < tuneles[0].fin)
+            continue;
+        
+        if(pasadizos[i].inicio < tuneles[1].fin && pasadizos[i].inicio > tuneles[i].inicio)
+            continue;
+        
+        tuneles.push_back(pasadizos[i]);
+    }
 }
 
 int distanciaMinima(vector<int> dist, vector<bool> spt){
@@ -95,24 +98,19 @@ int distanciaMinima(vector<int> dist, vector<bool> spt){
     return min_index;
 }
 
-int dijkstra(vector<vector<int>> &grafo, int src, vector<tuple<int, int, int>>& tuneles){
+int dijkstra(vector<vector<int>> &grafo, int src, vector<Tunel>& tuneles){
     vector<int> dist(cant_salones, INT_MAX);    //dist guarda la distancia mas corta del origen hasta i
     vector<bool> spt(cant_salones, false);     //spt es true sii el nodo i esta incluido en shortest path tree o si ya se sabe la menor distancia del origen a i
  
     dist[src] = 0;
- 
+
     for (int count = 0; count < cant_salones; count++) {
         int u = distanciaMinima(dist, spt);
 
         spt[u] = true;
         for (int v = 0; v < cant_salones; v++){
             if (!spt[v] && grafo[u][v] && dist[u] != INT_MAX && dist[u] + grafo[u][v] < dist[v]){
-                if(grafo[u][v] == 2 && esTunel(u, v, tuneles))
-                    dist[v] = dist[u] + grafo[u][v];
-                else if (grafo[u][v] == 2)
-                    continue;
-                else
-                    dist[v] = dist[u] + grafo[u][v];
+                dist[v] = dist[u] + grafo[u][v];
             }
         }
     }
@@ -130,41 +128,36 @@ int main(){
         cin >> cant_salones >> cant_tuneles;
         vector<vector<int>> grafo(cant_salones, vector<int>(cant_salones,0));
 
-        for(int k = 0; k < cant_salones; k++){
-            if(k == cant_salones-1)
-                continue;
-            else
-                grafo[k][k+1] = 1;  // cada nodo (salon) tiene una arista dirigida al siguiente nodo con peso 1 (pq tarda 1 min en saltar la muralla)
+        for(int k = 0; k < cant_salones-1; k++){
+            grafo[k][k+1] = 1;  // cada nodo (salon) tiene una arista dirigida al siguiente nodo con peso 1 (pq tarda 1 min en saltar la muralla)
         }
 
         for(int j = 0; j < cant_tuneles; j++){
             int inicio, fin;
             cin >> inicio >> fin;
-            grafo[inicio-1][fin-1] = 2;  // resto 1 en inicio y fin pq vectores empiezan con 0 y los casos de test empiezan en 1
-                                         // le asigno 2 a la arista pq tarda 2 min en atravezar el tunel
+            grafo[inicio-1][fin-1] = 0;
             
             int cubre = fin - inicio;
-            if(cubre > 2)
-                pasadizos.push_back({inicio-1, fin-1, cubre});    
+            if(cubre > 2){
+                pasadizos.push_back({inicio-1, fin-1, cubre});
+            }
         }
 
         sortVectorOfTuplesByThirdElement(pasadizos);
-        getMax(pasadizos, tuneles1);
-        int res1 = dijkstra(grafo, 0, tuneles1);
-
         sortVectorOfTuplesBySecondElement(pasadizos);
-        sortVectorOfTuplesByThirdElement(pasadizos);
-        getMax(pasadizos, tuneles2);
+        //printVectorTuplas(pasadizos);
+        tuneles = vector<Tunel>();
+        getMax(pasadizos, tuneles);
+        for(Tunel t : tuneles){
+            grafo[t.inicio][t.fin] = 2;
+        }
+        //cout << "--------------------" << endl;
+        //printVectorTuplas(tuneles);
+        int res1 = dijkstra(grafo, 0, tuneles);
 
-        int res2 = dijkstra(grafo, 0, tuneles2);
-        
-        if(res1 <= res2)
-            cout << res1 << endl;
-        else
-            cout << res2 << endl;
+        cout << res1 << endl;
 
-        tuneles1.clear();
-        tuneles2.clear();
+        tuneles.clear();
         pasadizos.clear();
     }
 
