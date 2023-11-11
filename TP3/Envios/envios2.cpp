@@ -58,38 +58,40 @@ int maxflow(int s, int t) {
 
 
 void solve(){
-    double high = 10e6*m;
+    double high = 10e6*personas;
     double low = 0; double mid;
-    double epsilon = 1e-6;
+    double epsilon = 1e-8;
     capacityOriginal = capacity;
+    int res;
+
+    //no nos interesan decimales
     while(high-low > epsilon){
         mid = (high+low)/2;
 
         int bundle_size = mid / personas;
-
+        //bundle_size == 0 implica que este objetivo podría realizarse solo si cada persona llevara una "fraccion" de herramienta
         if(bundle_size == 0){
-            high = mid;
+            low = mid;
             continue;
         }
 
         for(int i = 0; i < n; i++){
             for(int j : adj[i])
-                capacity[i][j] = floor(double(capacityOriginal[i][j] / bundle_size));
+                capacity[i][j] = capacityOriginal[i][j] / bundle_size;
         }
 
         int flow = maxflow(0, n-1);
         if(flow == personas){
-            cout << personas*bundle_size << endl;
-            return;
-        }
-        if(flow > personas){
+            res = bundle_size*personas;
+            break;
+        }else if(flow > personas){
             low = mid;
         }else{
             high = mid;
         }
 
     }
-    cout << floor(mid) << endl;
+    cout << res << endl;
 }
 
 
