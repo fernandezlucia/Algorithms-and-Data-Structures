@@ -9,24 +9,14 @@ using namespace std;
 #define INF INT_MAX
 
 int n;
+vector<vector<int>> aristas;
+bool imposible;
+
 // DIST DE CONEXION(u,v) = minima cant. de enlaces para ir de u a v
 // LATENCIA(u,v) = minima cant. de tiempo (en milisegundos > 0) que se tarde en ir de u a v
 
 // Hay q obtener la dist. de conexion entre todo nodo (u,v) sabiendo las latencias o si las latencias son incompatibles con la red
 // Dan la matriz de adyacencias con peso, hay q devolver la matriz de distancias? -> Algo floyd?
-
-void printMatrix(vector<vector<int>> &grafo){
-    for(vector<int> i : grafo){
-        cout << "(";
-        for(int l = 0; l < i.size(); l++){
-            if(l != i.size()-1)
-                cout << i[l] << " ";
-            else
-                cout << i[l];
-        }
-        cout << ")" << endl;
-    }
-}
 
 void printSolution(vector<vector<int>> &matriz_dist){
     for (int i = 0; i < n; i++) {
@@ -41,28 +31,28 @@ void printSolution(vector<vector<int>> &matriz_dist){
 	}
 }
 
-
-void floyd(vector<vector<int>> &ady, vector<vector<int>> &dist){
+void floydWarshall(vector<vector<int>> &dist){
 	int i, j, k;
-    bool not_pos = false;
+    
 	for (k = 0; k < n; k++) {
 		for (i = 0; i < n; i++) {
 			for (j = 0; j < n; j++) {
-				if (ady[i][j] == (ady[i][k] + ady[k][j]))
-                    dist[i][j] = dist[i][j] + 1;
-                else if (ady[i][j] > (ady[i][k] + ady[k][j]))
-                    not_pos = true;
+				if (dist[i][j] > (dist[i][k] + dist[k][j]) && (dist[k][j] != INF && dist[i][k] != INF)){
+                    if(dist[i][j] > dist[i][k] + dist[k][j]){
+                        cout << "IMPOSIBLE" << endl;
+                        imposible = true;
+                        return;
+                    }
+                }
+                if(dist[i][j] == (dist[i][k] + dist[k][j])){
+                    aristas[i][j] += 1;
+                }
 			}
 		}
 	}
-
-    if(not_pos){ 
-        cout << "IMPOSIBLE" <<  endl;
-    } else {
-        cout << "POSIBLE" <<  endl;
-	    printSolution(dist);
-    }
+    
 }
+
 
 int main(){
     int c;
@@ -71,8 +61,7 @@ int main(){
     for(int k = 0; k < c; k++){
         cin >> n;
         vector<vector<int>> matriz_ady(n, vector<int>(n,0));
-        vector<vector<int>> matriz_dist(n, vector<int>(n,-1));
-
+        aristas = vector<vector<int>>(n, vector<int>(n, -1));
         for(int i = 0; i < n-1; i++){
             for(int j = 0; j < i+1; j++){
                 int temp;
@@ -81,18 +70,13 @@ int main(){
                 matriz_ady[j][i+1] = temp;
             }
         }
-        //printMatrix(matriz_ady);
-        floyd(matriz_ady, matriz_dist);
+        imposible = false;
+        floydWarshall(matriz_ady);
 
-        matriz_ady.clear();
-        matriz_dist.clear();
+        if(!imposible){
+            cout << "POSIBLE" << endl;
+            printSolution(aristas);
+        }
     }
     return 0;
 }
-
-/*
-matriz de ady para floyd, con l(u,v) funcion de peso
-         { 0         si i=j
-l(i,j) = { l(u,v)    si (u,v) esta en E
-         { inf       si (u,v) NO esta en E
-*/
