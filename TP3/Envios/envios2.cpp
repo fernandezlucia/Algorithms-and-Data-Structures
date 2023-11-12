@@ -2,6 +2,7 @@
 #include<iostream>
 #include<queue>
 #include<limits.h>
+#include<cmath>
 using namespace std;
 
 int n, m, personas;
@@ -58,35 +59,37 @@ int maxflow(int s, int t) {
 
 
 void solve(){
-    int high = max_cap * personas;
-    int low = 0; double mid;
+    int high = 10e6 * personas;
+    int low = 0; float mid;
     capacityOriginal = capacity;
     int res = 0;
     //no nos interesan decimales
-    while(high-low > 1){
-        mid = (high+low)/2;
+    while(low <= high){
+        mid = ((high+low)/(2*personas))*personas;
 
         int bundle_size = mid / personas;
 
         //bundle_size == 0 implica que este objetivo podría realizarse solo si cada persona llevara una "fraccion" de herramienta
         if(bundle_size == 0){
-            low = mid;
+            low = mid + personas;
             continue;
         }
 
         for(int i = 0; i < n; i++){
-            for(int j : adj[i])
+            for(int j : adj[i]){
                 capacity[i][j] = capacityOriginal[i][j] / bundle_size;
+            }
         }
 
         int flow = maxflow(0, n-1);
         if(flow == personas){
+            //printf("flow es: %d y res es: %d y mid es: %f \n", flow, bundle_size*personas, mid);
             res = bundle_size*personas;
-            low = mid;
+            low = mid + personas;
         }else if(flow > personas){
-            low = mid;
+            low = mid + personas;
         }else{
-            high = mid;
+            high = mid - personas;
         }
 
     }
