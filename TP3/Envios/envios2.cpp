@@ -64,14 +64,14 @@ void solve(){
     capacityOriginal = capacity;
     int res = 0;
     //no nos interesan decimales
-    while(low <= high){
-        mid = ((high+low)/(2*personas))*personas;
+    while(high-low > 1){
+        mid = (high+low)/2;
 
         int bundle_size = mid / personas;
 
         //bundle_size == 0 implica que este objetivo podría realizarse solo si cada persona llevara una "fraccion" de herramienta
         if(bundle_size == 0){
-            low = mid + personas;
+            low = mid;
             continue;
         }
 
@@ -85,11 +85,11 @@ void solve(){
         if(flow == personas){
             //printf("flow es: %d y res es: %d y mid es: %f \n", flow, bundle_size*personas, mid);
             res = bundle_size*personas;
-            low = mid + personas;
+            low = mid;
         }else if(flow > personas){
-            low = mid + personas;
+            low = mid;
         }else{
-            high = mid - personas;
+            high = mid;
         }
 
     }
