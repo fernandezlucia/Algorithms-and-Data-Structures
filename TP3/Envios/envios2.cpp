@@ -2,13 +2,13 @@
 #include<iostream>
 #include<queue>
 #include<limits.h>
-#include<cmath>
 using namespace std;
 
 int n, m, personas;
 vector<vector<int>> capacity;
 vector<vector<int>> capacityOriginal;
 vector<vector<int>> adj;
+int max_cap;
 
 int INF = INT_MAX;
 
@@ -58,17 +58,16 @@ int maxflow(int s, int t) {
 
 
 void solve(){
-    double high = 10e6*personas;
-    double low = 0; double mid;
-    double epsilon = 1e-8;
+    int high = max_cap * personas;
+    int low = 0; double mid;
     capacityOriginal = capacity;
-    int res;
-
+    int res = 0;
     //no nos interesan decimales
-    while(high-low > epsilon){
+    while(high-low > 1){
         mid = (high+low)/2;
 
         int bundle_size = mid / personas;
+
         //bundle_size == 0 implica que este objetivo podría realizarse solo si cada persona llevara una "fraccion" de herramienta
         if(bundle_size == 0){
             low = mid;
@@ -83,7 +82,7 @@ void solve(){
         int flow = maxflow(0, n-1);
         if(flow == personas){
             res = bundle_size*personas;
-            break;
+            low = mid;
         }else if(flow > personas){
             low = mid;
         }else{
@@ -100,7 +99,10 @@ int main(){
 
     cin >> c;
     for (int i = 0; i < c; i++){
+        max_cap = 0;
         cin >> n >> m >> personas;
+
+
 
         adj = vector<vector<int>>(n);
         capacity = vector<vector<int>>(n, vector<int>(n, 0));
@@ -110,7 +112,12 @@ int main(){
             cin >> inicio >> destino >> capacidad;
             inicio--; destino--;
             adj[inicio].push_back(destino);
+            adj[destino].push_back(inicio);
             capacity[inicio][destino] = capacidad;
+            capacity[destino][inicio] = capacidad;
+
+            if(capacidad > max_cap)
+                max_cap = capacidad;
         }
         
         solve();
