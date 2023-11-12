@@ -60,16 +60,15 @@ int maxflow(int s, int t) {
 
 void solve(){
     int high = 10e6 * personas;
-    int low = 0; float mid;
+    int low = 0;
+    int res = 0;        //no nos interesan decimales
+    float mid;
     capacityOriginal = capacity;
-    int res = 0;
-    //no nos interesan decimales
+
     while(high-low > 1){
-        mid = (high+low)/2;
-
+        mid = (high + low)/2;
         int bundle_size = mid / personas;
-
-        //bundle_size == 0 implica que este objetivo podría realizarse solo si cada persona llevara una "fraccion" de herramienta
+        
         if(bundle_size == 0){
             low = mid;
             continue;
@@ -83,7 +82,6 @@ void solve(){
 
         int flow = maxflow(0, n-1);
         if(flow == personas){
-            //printf("flow es: %d y res es: %d y mid es: %f \n", flow, bundle_size*personas, mid);
             res = bundle_size*personas;
             low = mid;
         }else if(flow > personas){
@@ -93,7 +91,7 @@ void solve(){
         }
 
     }
-    cout << res << endl;
+    //cout << res << endl;
 }
 
 
@@ -111,14 +109,16 @@ int main(){
         capacity = vector<vector<int>>(n, vector<int>(n, 0));
 
         for(int k = 0; k < m; k++){
-            int inicio; int destino; int capacidad;
+            int inicio, destino, capacidad;
+            
             cin >> inicio >> destino >> capacidad;
-            inicio--; destino--;
+            inicio--; 
+            destino--;
+
             adj[inicio].push_back(destino);
             adj[destino].push_back(inicio);
             capacity[inicio][destino] = capacidad;
-            capacity[destino][inicio] = capacidad;
-
+            capacity[destino][inicio] = capacidad;            
             if(capacidad > max_cap)
                 max_cap = capacidad;
         }
