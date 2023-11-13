@@ -1,151 +1,125 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-
+#include<vector>
+#include<iostream>
+#include<queue>
+#include<limits.h>
+#include<cmath>
 using namespace std;
 
-#define UNDEFINED -1
+int n, m, personas;
+vector<vector<int>> capacity;
+vector<vector<int>> capacityOriginal;
+vector<vector<int>> adj;
+int max_cap;
 
-int n, m;
-int companeros;
-vector<vector<int>> mapa;
+int INF = INT_MAX;
 
-void printMatrix(vector<vector<int>> &grafo){
-    for(vector<int> i : grafo){
-        cout << "(";
-        for(int l = 0; l < i.size(); l++){
-            if(l != i.size()-1)
-                cout << i[l] << " ";
-            else
-                cout << i[l];
-        }
-        cout << ")" << endl;
-    }
-}
+int bfs(int s, int t, vector<int>& parent) {
+    fill(parent.begin(), parent.end(), -1);
+    parent[s] = -2;
+    queue<pair<int, int>> q;
+    q.push({s, INF});
 
-void printVectorpair(vector<pair<int, int>> &v){
-    for(pair<int,int> i : v){
-        cout << "(" << i.first << ", " << i.second  << ")" << endl;
-    }
-}
+    while (!q.empty()) {
+        int cur = q.front().first;
+        int flow = q.front().second;
+        q.pop();
 
-void printVector(vector<int> &v){
-    for (int i : v)
-        cout << i << " ";
-    cout << endl;
-}
-
-
-vector<pair<int, int>> caminoAumento(vector<vector<int>>& red_residual, vector<pair<int, int>>& camino){
-    vector<bool> visitado(n, false);
-    visitado[0] = true;
-    queue<int> queue;
-    queue.push(0);
-
-    while(!queue.empty()){
-        int v = queue.front();
-        queue.pop();
-
-        for(int u = 0; u < red_residual[v].size(); u++){
-            if(red_residual[v][u] == UNDEFINED)
-                continue;
-            
-            if(u == n-1){
-                camino.push_back({v, u});
-                return camino;
-            }
-
-            int cant_hijos = 0;
-            for(int h = 0; h < red_residual[u].size(); h++){
-                if(mapa[u][h] != UNDEFINED)
-                    cant_hijos++;
-            }
-            
-            if(cant_hijos == 0 )
-                continue;
-            
-            if(!visitado[u]){
-                visitado[u] = true;
-                queue.push(u);
-                camino.push_back({v, u});
-                break;
+        for (int next : adj[cur]) {
+            if (parent[next] == -1 && capacity[cur][next]) {
+                parent[next] = cur;
+                int new_flow = min(flow, capacity[cur][next]);
+                if (next == t)
+                    return new_flow;
+                q.push({next, new_flow});
             }
         }
     }
-    return camino;
+
+    return 0;
 }
 
-int minAristaenCamino(vector<pair<int, int>>& camino, vector<vector<int>>& red_residual){
-    int min = red_residual[camino[0].first][camino[0].second];
-    for(int i = 1; i < camino.size(); i++){
-        if(red_residual[camino[i].first][camino[i].second] < min)
-            min = red_residual[camino[i].first][camino[i].second];
-    }
-    return min;
-}
+int maxflow(int s, int t) {
+    int flow = 0;
+    vector<int> parent(n);
+    int new_flow;
 
-int flujoMaximo(vector<vector<int>>& red_residual, vector<vector<int>> flujo){
-    vector<pair<int, int>> camino;
-    int flujo_max = 0;
-    while(caminoAumento(red_residual, camino).size() > 0){
-        printVectorpair(camino);
-        
-        int min_arista = minAristaenCamino(camino,red_residual);
-        flujo_max += min_arista;
-
-        //cout << "---------" << endl;
-        for(int a = 0; a < camino.size(); a++){
-            int i = camino[a].first;
-            int j = camino[a].second;
-
-            if(mapa[i][j] != UNDEFINED){    // si esta definido ij en el grafo
-                if(flujo[i][j] + min_arista == mapa[i][j]){     // si sumandole el minimo llena la capacidad de la arista
-                    flujo[i][j] += min_arista;  // suma el flujo en el grafo
-                    red_residual[j][i] = mapa[i][j];    //actualiza la red dando vuelta la arista
-                    red_residual[i][j] = UNDEFINED;
-                } else if(flujo[i][j] + min_arista < mapa[i][j]){   //si sumandole el minimo no llena la capacidad de la arista y es mayor a 0
-                    flujo[i][j] += min_arista;  // suma el flujo en el grafo
-                    red_residual[i][j] -= min_arista;   // actualiza la red poniendo la arista que ya estaba con el valor de flujo que todavia puede pasar por esa arista
-                    red_residual[j][i] = min_arista;    // agrega otra arista en la red q va al reves con el flujo que ya paso por esa arista
-                }   
-            } else if(mapa[j][i] != UNDEFINED){
-                flujo[j][i] -= min_arista;
-                red_residual[i][j] = mapa[j][i];   
-                red_residual[j][i] = UNDEFINED;
-            }
-
+    while (new_flow = bfs(s, t, parent)) {
+        flow += new_flow;
+        int cur = t;
+        while (cur != s) {
+            int prev = parent[cur];
+            capacity[prev][cur] -= new_flow;
+            capacity[cur][prev] +=  new_flow;
+            cur = prev;
         }
-        //cout << "min: " << min_arista << endl;
-        cout << "---------" << endl;
-        camino.clear();
     }
-    return flujo_max;
+
+    return flow;
 }
+
+
+void solve(){
+    int high = personas * (max_cap+1);
+    int low = 0; int mid;
+    capacityOriginal = capacity;
+    int res = 0;
+    while(high-low > 1){
+        mid = (high+low)/2;
+
+        int bundle_size = mid / personas;
+
+        if(bundle_size == 0){
+            low = mid;
+            continue;
+        }
+
+        for(int i = 0; i < n; i++){
+            for(int j : adj[i]){
+                capacity[i][j] = capacityOriginal[i][j] / bundle_size;
+            }
+        }
+
+        int flow = maxflow(0, n-1);
+
+        if(flow >= personas){
+            res = bundle_size*personas;
+            low = mid;
+        }
+        else{
+            high = mid;
+        }
+
+    }
+    cout << res << endl;
+}
+
 
 int main(){
     int c;
 
     cin >> c;
-
     for (int i = 0; i < c; i++){
-        cin >> n >> m >> companeros;
-        mapa = vector<vector<int>> (n, vector<int>(m, UNDEFINED));
-        vector<vector<int>> red_residual(n, vector<int>(m, UNDEFINED));
-        vector<vector<int>> flujo(n, (vector<int>(m, 0)));
-        //flujo inicial cero ??
-        // ij ∈ AR si xij < uij 
-        // ji ∈ AR si xij > 0.
-        for(int j = 0; j < m; j++){
-            int esq1, esq2, cant_herramientas;
-            cin >> esq1 >> esq2 >> cant_herramientas;
-            mapa[esq1-1][esq2-1] = cant_herramientas;
-            red_residual[esq1-1][esq2-1] = cant_herramientas;
-        }
+        max_cap = 0;
+        cin >> n >> m >> personas;
 
-        //printMatrix(red_residual);
-        int flujo_max = flujoMaximo(red_residual, flujo);
-        cout << flujo_max << endl;
-              
+
+
+        adj = vector<vector<int>>(n);
+        capacity = vector<vector<int>>(n, vector<int>(n, 0));
+
+        for(int k = 0; k < m; k++){
+            int inicio; int destino; int capacidad;
+            cin >> inicio >> destino >> capacidad;
+            inicio--; destino--;
+            adj[inicio].push_back(destino);
+            adj[destino].push_back(inicio);
+            capacity[inicio][destino] = capacidad;
+
+            if(capacidad >= max_cap)
+                max_cap = capacidad;
+        }
+        
+        solve();
     }
 
     return 0;
