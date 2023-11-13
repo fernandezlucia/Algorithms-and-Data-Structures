@@ -59,16 +59,27 @@ int maxflow(int s, int t) {
 
 
 void solve(){
+<<<<<<< HEAD
     int high = 10e6 * personas;
     int low = 0;
     int res = 0;        //no nos interesan decimales
     float mid;
     capacityOriginal = capacity;
 
+=======
+    int high = personas * (max_cap+1);
+    int low = 0; int mid;
+    capacityOriginal = capacity;
+    int res = 0;
+>>>>>>> 19811dc (envios terminado)
     while(high-low > 1){
         mid = (high + low)/2;
         int bundle_size = mid / personas;
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 19811dc (envios terminado)
         if(bundle_size == 0){
             low = mid;
             continue;
@@ -81,12 +92,16 @@ void solve(){
         }
 
         int flow = maxflow(0, n-1);
+<<<<<<< HEAD
         if(flow == personas){
+=======
+
+        if(flow >= personas){
+>>>>>>> 19811dc (envios terminado)
             res = bundle_size*personas;
             low = mid;
-        }else if(flow > personas){
-            low = mid;
-        }else{
+        }
+        else{
             high = mid;
         }
 
@@ -118,8 +133,13 @@ int main(){
             adj[inicio].push_back(destino);
             adj[destino].push_back(inicio);
             capacity[inicio][destino] = capacidad;
+<<<<<<< HEAD
             capacity[destino][inicio] = capacidad;            
             if(capacidad > max_cap)
+=======
+
+            if(capacidad >= max_cap)
+>>>>>>> 19811dc (envios terminado)
                 max_cap = capacidad;
         }
         
