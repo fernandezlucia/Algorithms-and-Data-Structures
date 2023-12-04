@@ -1,9 +1,0 @@
-{
-    "C_Cpp.default.compilerPath": "/usr/bin/g++",
-    "files.associations": {
-        "algorithm": "cpp",
-        "iostream": "cpp",
-        "queue": "cpp",
-        "tuple": "cpp"
-    }
-}
