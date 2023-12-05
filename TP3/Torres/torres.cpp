@@ -1,158 +1,15 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <tuple>
-#include <limits.h>
-#include <queue>
+#include<vector>
+#include<iostream>
+#include<limits.h>
+#include<queue>
 
 using namespace std;
-
-int N;
+int n;
+vector<vector<int>> tablero;
+vector<vector<int>> adj;
+vector<vector<int>> capacity;
 int INF = INT_MAX;
-vector<vector<int>> capacidad;
-vector<vector<int>> grafo;
-
-struct segmento{
-    int id;
-    bool tipo;  // 0 fila, 1 columna
-    pair<int, int> inicio;
-    pair<int, int> fin;
-};
-vector<segmento> filas;
-vector<segmento> columnas;
-
-void printMatrix(vector<vector<int>> &matriz){
-    for (int i = 0; i < matriz.size(); i++) {
-		for (int j = 0; j < matriz[i].size() ; j++) {
-			cout << matriz[i][j] << " ";
-		}
-		cout << endl;
-	}
-}
-
-void printSeg(vector<segmento> &v){
-
-    for(segmento a : v){     
-        cout << "(" << a.id << ", " << a.tipo << " " << "<" << a.inicio.first << ", " << a.inicio.second << ">" << " " << "<" << a.fin.first << ", " << a.fin.second << ">" << ")" << endl;
-    }
-    
-}
-
-void printSeg2(vector<segmento> &v){
-    for(segmento a : v){     
-        cout << "(" << a.id << "), ";
-    }
-}
-
-void printGrafo(vector<vector<segmento>> &matriz){
-    for (int i = 0; i < matriz.size(); i++) {
-        cout << "i: " << i << " ";
-		printSeg2(matriz[i]);
-		cout << endl;
-	}
-}
-
-vector<segmento> extraerFilas(vector<vector<int>>& tablero, int &id){
-    vector<segmento> filas(0);
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++){
-            pair<int, int> inicio = {i, j};
-            pair<int, int> fin = {i, j};
-
-            if(tablero[i][j] == 1)
-                continue;
-
-            while(tablero[i][j] != 1 && j != N-1){
-                j++;
-                fin = {i, j};
-            }
-            
-            j = fin.second;
-            
-            if(tablero[i][j] == 1)
-                fin = {i, j-1};
-            
-            segmento v = {id, 0, inicio, fin};
-            filas.push_back(v);
-            id++;
-        }
-    }
-    return filas;
-}
-
-vector<segmento> extraerColumnas(vector<vector<int>>& tablero, int& id){
-    vector<segmento> columnas(0);
-    for(int j = 0; j < N; j++){
-        for(int i = 0; i < N; i++){
-            pair<int, int> inicio = {i, j};
-            pair<int, int> fin = {i, j};
-
-            if(tablero[i][j] == 1)
-                continue;
-                
-            while(tablero[i][j] != 1 && i != N-1){
-                i++;
-                fin = {i, j};
-            }
-            i = fin.first;
-            
-            if(tablero[i][j] == 1 && i != 0)
-                fin = {i-1, j};
-            
-            segmento v = {id, 1, inicio, fin};
-            columnas.push_back(v);
-            id++;
-        }
-    }
-    return columnas;
-}
-
-bool puntoPertenece(segmento s, pair<int, int> p){
-    return (s.inicio.first <= p.first && p.first <= s.fin.first) && (s.inicio.second <= p.second && p.second <= s.fin.second);
-}
-
-bool hayInterseccion(segmento fila, segmento columna){
-    int x = fila.inicio.first;             
-    int y = columna.inicio.second;
-    
-    return puntoPertenece(fila, {x, y}) && puntoPertenece(columna, {x, y});
-}
-
-vector<vector<int>> procesarTablero(vector<vector<int>>& tablero){
-    vector<vector<segmento>> grafo_seg;
-    vector<vector<int>> grafo;
-    int id = 1;
-    filas = extraerFilas(tablero, id);
-    columnas = extraerColumnas(tablero, id);
-
-    grafo.push_back({});
-
-    for(segmento f : filas){
-        grafo_seg.push_back({});
-        grafo[0].push_back(f.id);
-        grafo.push_back({});
-        for(segmento c : columnas){            
-            if(hayInterseccion(f,c)){
-                grafo_seg.back().push_back(c);
-                grafo.back().push_back(c.id);
-            }
-        }
-    }
-
-    grafo.push_back({});
-    for(segmento c : columnas){
-        grafo.back().push_back(c.id);
-    }
-    
-    //cout << "filas: " << endl;   
-    //printSeg(filas);
-    //cout << "columnas: " << endl;
-    //printSeg(columnas);
-//
-    //printGrafo(grafo_seg);
-    printMatrix(grafo);
-    return grafo;
-}
+int grafoSize;
 
 int bfs(int s, int t, vector<int>& parent) {
     fill(parent.begin(), parent.end(), -1);
@@ -165,10 +22,10 @@ int bfs(int s, int t, vector<int>& parent) {
         int flow = q.front().second;
         q.pop();
 
-        for (int next : grafo[cur]) {
-            if (parent[next] == -1 && capacidad[cur][next]) {
+        for (int next : adj[cur]) {
+            if (parent[next] == -1 && capacity[cur][next]) {
                 parent[next] = cur;
-                int new_flow = min(flow, capacidad[cur][next]);
+                int new_flow = min(flow, capacity[cur][next]);
                 if (next == t)
                     return new_flow;
                 q.push({next, new_flow});
@@ -181,7 +38,7 @@ int bfs(int s, int t, vector<int>& parent) {
 
 int maxflow(int s, int t) {
     int flow = 0;
-    vector<int> parent(filas.size() + columnas.size());
+    vector<int> parent(grafoSize);
     int new_flow;
 
     while (new_flow = bfs(s, t, parent)) {
@@ -189,8 +46,8 @@ int maxflow(int s, int t) {
         int cur = t;
         while (cur != s) {
             int prev = parent[cur];
-            capacidad[prev][cur] -= new_flow;
-            capacidad[cur][prev] +=  new_flow;
+            capacity[prev][cur] -= new_flow;
+            capacity[cur][prev] +=  new_flow;
             cur = prev;
         }
     }
@@ -198,31 +55,140 @@ int maxflow(int s, int t) {
     return flow;
 }
 
+void printMatrix(vector<vector<int>> &matriz){
+    for (int i = 0; i < matriz.size(); i++) {
+		for (int j = 0; j < matriz[i].size() ; j++) {
+			cout << matriz[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
 
+void printSeg(vector<vector<pair<int,int>>> &matriz){
+    for (int i = 0; i < matriz.size(); i++) {
+		for (int j = 0; j < matriz[i].size(); j++) {
+			cout << matriz[i][j].first << "," << matriz[i][j].second << " ";
+		}
+		cout << endl;
+	}
+}
 
-int main(){
-    int c;
-    cin >> c;
-
-    for(int i = 0; i < c; i++){
-        cin >> N;
-        vector<vector<int>> tablero(N, vector<int>(N, 0));
-
-        for(int j = 0; j < N; j++){
-            for(int k = 0; k < N; k++){
-                int casillero_roto;
-                cin >> casillero_roto;
-                tablero[j][k] = casillero_roto;
+vector<vector<pair<int, int>>> getRowSegments(vector<vector<int>>& tablero){
+    vector<vector<pair<int,int>>> rowSegments;
+    for(vector<int> row : tablero){
+        vector<pair<int, int>> segments;
+        int start = -1;
+        for(int i = 0; i < n; i++){
+            if(row[i] == 0 && start == -1){
+                start = i;
+            }
+            if(row[i] == 1 && start != -1){
+                segments.emplace_back(start, i-1);
+                start = -1;
             }
         }
+        if(start != -1)
+            segments.emplace_back(start, row.size()-1);
 
-        grafo = procesarTablero(tablero);
-        int n = filas.size()+columnas.size();
-        capacidad = (vector<vector<int>>(n, vector<int>(n, 1)));
-        int res = maxflow(0, n);
-        cout << res << endl;
+        rowSegments.push_back(segments);
+        
+    }
+    return rowSegments;
+}
 
+vector<vector<pair<int, int>>> getColumnSegments(vector<vector<int>>& tablero){
+    vector<vector<pair<int,int>>> colSegments(n);
+    for(int j = 0; j < n; j++){
+        int start = -1;
+        for(int i = 0; i < n; i++){
+            if(tablero[i][j] == 0 && start == -1){
+                start = i;
+            }
+            if(tablero[i][j] == 1 && start != -1){
+                colSegments[j].emplace_back(start, i-1);
+                start = -1;
+            }
+        }
+        if(start != -1){
+            colSegments[j].emplace_back(start, n-1);
+        }
+    }
+    return colSegments;
+}
+
+void buildGraph(vector<vector<int>>& tablero){
+    vector<vector<pair<int, int>>> rowSegments = getRowSegments(tablero);
+    vector<vector<pair<int, int>>> columnSegments = getColumnSegments(tablero);
+
+    vector<vector<int>> mSegR = vector<vector<int>>(n, vector<int>(n, -1));
+    vector<vector<int>> mSegC = vector<vector<int>>(n, vector<int>(n, -1));
+
+    int rowV = 0;
+    int colV = 0;
+
+    int segmento = 1;
+    for(int i = 0; i < rowSegments.size(); i++){
+        int segmentos = rowSegments[i].size();
+        rowV += segmentos;
+        for(int j = 0; j < segmentos; j++){
+            for(int k = rowSegments[i][j].first; k <= rowSegments[i][j].second; k++){
+                mSegR[i][k] = segmento;
+            }
+            segmento++;
+        }
+    }
+    
+    for(int i = 0; i < columnSegments.size(); i++){
+        int segmentos = columnSegments[i].size();
+        colV += segmentos;
+        for(int j = 0; j < segmentos; j++){
+            for(int k = columnSegments[i][j].first; k <= columnSegments[i][j].second; k++){
+                mSegC[k][i] = segmento;
+            }
+            segmento++;
+        }
     }
 
-    return 0;
+    adj = vector<vector<int>>(rowV + colV + 2);
+    capacity = vector<vector<int>>(rowV+colV+2, vector<int>(rowV+colV+2, 0));
+
+    for(int i = 0; i < mSegR.size(); i++){
+        for(int j = 0; j < mSegR[i].size(); j++){
+            if(mSegR[i][j] != -1 && mSegC[i][j] != -1){
+                adj[mSegR[i][j]].push_back(mSegC[i][j]);
+                adj[mSegC[i][j]].push_back(mSegR[i][j]);
+                capacity[mSegR[i][j]][mSegC[i][j]] = 1;
+            }
+        }
+    }
+
+    for(int i = 1; i <= rowV; i++){
+        adj[0].push_back(i);
+        adj[i].push_back(0);
+        capacity[0][i] = 1;
+    }
+    for(int i = rowV + 1; i <= rowV+colV; i++){
+        adj[i].push_back(rowV+colV+1);
+        adj[rowV+colV+1].push_back(i);
+        capacity[i][rowV+colV+1] = 1;
+    }
+    grafoSize = rowV+colV+2;
+    cout << maxflow(0, rowV+colV+1) << endl;
 }
+
+int main(){
+    int casos;
+    cin >> casos;
+    while(casos--){
+        cin >> n;
+        tablero = vector<vector<int>>(n, vector<int>(n, 0));
+
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < n; j++){
+                cin >> tablero[i][j];
+            }
+        }
+        buildGraph(tablero);
+    }
+}
+

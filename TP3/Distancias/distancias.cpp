@@ -49,7 +49,6 @@ bool floydWarshallCheck(vector<vector<int>> &dist){
     for (k = 0; k < n; k++) {
 		for (i = 0; i < n; i++) {
 			for (j = 0; j < n; j++) {
-                //if(aristas_orig[i][j]) continue;
                 if(k == i || k == j) continue;
                 if(i == j) aristas[i][j] = 0;
 				else if(dist[i][j] == dist[i][k] + dist[k][j]){
